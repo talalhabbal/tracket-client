@@ -5,20 +5,19 @@ import time
 
 SERVICE_UUID =          "12345678-1234-1234-1234-123456789ABC"
 DATA_CHAR_UUID =        "12345678-1234-1234-1234-123456789AB1"
-BUFFER_SIZE =           15 # 3 floats * 4 Bytes each = 12 bytes per sample
-READINGS_PER_SAMPLE =   3
+BUFFER_SIZE =           10
+READINGS_PER_SAMPLE =   6
 PACKET_SIZE =           BUFFER_SIZE * READINGS_PER_SAMPLE * 4
-# DEVICE_NAME =           "Nano33BLE"
+
 
 class BLEHandler:
-    def __init__(self, address):
+    def __init__(self, address, file_handler):
         self.address = address
         self.client = BleakClient(self.address, timeout=60)
         self.running = asyncio.Event()
         self.connected = False
-        self.acc_list = []
-        self.gyro_list = []
         self.time_last_notif = None
+        self.file_handler = file_handler
     
     #Handles connecting to the device
     async def connect(self):
@@ -71,7 +70,8 @@ class BLEHandler:
             format = '<' + 'f' * (num_of_samples * READINGS_PER_SAMPLE)
             values = struct.unpack(format, data)
             samples = [values[i:i+READINGS_PER_SAMPLE] for i in range(0, len(values), READINGS_PER_SAMPLE)]
-            self.acc_list.append(samples)
+            for sample in samples:
+                await self.file_handler.add_sample(list(sample))
             print(f"Received {num_of_samples} samples")
         
         except Exception as e:
@@ -95,11 +95,13 @@ class BLEHandler:
         Stops Reading data from connected device.
         """
         print(f"Stopping Reading incoming data...")
-        self.running.clear()
-        try:
-            await self.client.stop_notify(DATA_CHAR_UUID)
-        except Exception as e:
-            print(f"Stopping Reading Error: {e}")
+        if self.running.is_set():
+            self.running.clear()
+            try:
+                await self.client.stop_notify(DATA_CHAR_UUID)
+                self.time_last_notif = None
+            except Exception as e:
+                print(f"Stopping Reading Error: {e}")
     
     #Monitors BLE connection
     async def monitor_connection(self):

@@ -1,7 +1,6 @@
 import asyncio
 from bleak import BleakScanner
 
-DEVICE_NAME =           "Nano33BLE"
 
 async def input_handler(BLE_Handler):
     """
@@ -26,7 +25,7 @@ async def input_handler(BLE_Handler):
             break
 
 
-async def find_device():
+async def find_device(device_name):
     """
     Discovers devices using :class:`BleakScanner.discover()` and looks for the device with the specified name.
     Returns:
@@ -36,7 +35,7 @@ async def find_device():
     device_list = await BleakScanner.discover(timeout=10) # Returns a list of devices that it discovered while scanning
     for device in device_list:
         print(f"Found device: {device.name} - {device.address}")
-        if device.name and DEVICE_NAME in device.name: # If DEVICE_NAME is in the name of the device then it found the device
+        if device.name and device_name in device.name: # If DEVICE_NAME is in the name of the device then it found the device
             print(f"Found target device with name {device.name} with address {device.address}")
             return device.address
     print("Device not found!")
