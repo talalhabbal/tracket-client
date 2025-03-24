@@ -5,7 +5,7 @@ from FileHandler import FileHandler
 
 DEVICE_NAME =           "Nano33BLE"
 DATA_FILENAME =         "Data.csv"
-FILE_BUFFER_SIZE =      100 # 100 rows are saved before 
+FILE_BUFFER_SIZE =      10
 
 async def main():
     file_handler = FileHandler(DATA_FILENAME, FILE_BUFFER_SIZE)

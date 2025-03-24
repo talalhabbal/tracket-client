@@ -114,3 +114,5 @@ class BLEHandler:
                 self.client = BleakClient(self.address, timeout=60)
                 print("Device disconnected. Attemping to reconnect...")
                 await self.connect()
+                if self.running.is_set():
+                    await self.start_reading()
