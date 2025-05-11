@@ -36,7 +36,7 @@ class BLEHandler:
     async def disconnect(self):
         """
         Disconnects from the currently connected device
-        """
+ https://github.com/talalhabbal/tracket-client       """
         if self.client and self.client.is_connected:
             await self.client.disconnect()
             self.connected = False
@@ -69,7 +69,7 @@ class BLEHandler:
         try:
             format = '<' + 'f' * (num_of_samples * READINGS_PER_SAMPLE)
             values = struct.unpack(format, data)
-            samples = [values[i:i+READINGS_PER_SAMPLE] for i in range(0, len(values), READINGS_PER_SAMPLE)]
+            samples = [[time.time(), *values[i:i+READINGS_PER_SAMPLE]] for i in range(0, len(values), READINGS_PER_SAMPLE)]
             for sample in samples:
                 await self.file_handler.add_sample(list(sample))
             print(f"Received {num_of_samples} samples")
