@@ -1,11 +1,11 @@
 import asyncio
-from CameraHandler import CameraHandler
-from camera import CamHandler
+# from CameraHandler import CameraHandler
+from CamHandler import CamHandlerz
 async def main():
     # cam = CameraHandler()
-    cam = CamHandler()
+    cam = CamHandlerz()
     record_task = asyncio.create_task(cam.start_recording("cam_output", "auto5s"))
-    await asyncio.sleep(20)
+    await asyncio.sleep(5)
     await cam.stop_recording()
     await record_task
     print("5 second clip saved")

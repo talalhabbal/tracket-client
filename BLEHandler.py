@@ -11,13 +11,15 @@ PACKET_SIZE =           BUFFER_SIZE * READINGS_PER_SAMPLE * 4
 
 
 class BLEHandler:
-    def __init__(self, address, file_handler):
+    def __init__(self, address, file_handler, cam_handler):
         self.address = address
         self.client = BleakClient(self.address, timeout=60)
+        self.cam_handler = cam_handler
         self.running = asyncio.Event()
         self.connected = False
         self.time_last_notif = None
         self.file_handler = file_handler
+        self.recording_number = 0
     
     #Handles connecting to the device
     async def connect(self):
@@ -61,7 +63,7 @@ class BLEHandler:
     #Processes the incoming data
     async def process_data(self, data):
         """
-        Processes incoming data by unpacking it using :class:`struct.unpack()` and adding it to a list. (For the time being)
+        Processes incoming data by unpacking it using :class:`struct.unpack()`
         """
         sample_size = READINGS_PER_SAMPLE * 4
         num_of_samples = len(data) // sample_size # length of the data sent from arduino // the size of each sample
@@ -71,8 +73,10 @@ class BLEHandler:
             values = struct.unpack(format, data)
             samples = [values[i:i+READINGS_PER_SAMPLE] for i in range(0, len(values), READINGS_PER_SAMPLE)]
             for sample in samples:
-                await self.file_handler.add_sample(list(sample))
-            print(f"Received {num_of_samples} samples")
+                row = list(sample)
+                row.append(self.recording_number)
+                await self.file_handler.add_sample(row)
+            print(f"Received {num_of_samples} samples | Recording Number: {self.recording_number}")
         
         except Exception as e:
             print(f"Error Processing Data: {e}")
@@ -84,6 +88,8 @@ class BLEHandler:
         """
         print("Starting Reading incoming data...")
         self.running.set()
+        self.recording_number += 1
+        asyncio.create_task(self.cam_handler.start_recording(f"recording_{self.recording_number}"))
         try:
             await self.client.start_notify(DATA_CHAR_UUID, self.notification_handler)
         except Exception as e:
@@ -97,6 +103,7 @@ class BLEHandler:
         print(f"Stopping Reading incoming data...")
         if self.running.is_set():
             self.running.clear()
+            self.cam_handler.stop_recording()
             try:
                 await self.client.stop_notify(DATA_CHAR_UUID)
                 self.time_last_notif = None

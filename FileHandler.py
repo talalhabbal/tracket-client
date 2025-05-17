@@ -11,7 +11,7 @@ class FileHandler:
     
     async def write_header(self):
         if not os.path.exists(self.filename):
-            header = "ax,ay,az,gx,gy,gz\n"
+            header = "ax,ay,az,gx,gy,gz,recording\n"
             async with aiofiles.open(self.filename, mode='w', newline ='') as file:
                 await file.write(header)
                 
