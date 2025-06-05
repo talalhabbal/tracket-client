@@ -69,7 +69,7 @@ class BLEHandler:
         try:
             format = '<' + 'f' * (num_of_samples * READINGS_PER_SAMPLE)
             values = struct.unpack(format, data)
-            samples = [[time.time(), *values[i:i+READINGS_PER_SAMPLE]] for i in range(0, len(values), READINGS_PER_SAMPLE)]
+            samples = [[time.time() + i, *values[i:i+READINGS_PER_SAMPLE]] for i in range(0, len(values), READINGS_PER_SAMPLE)]
             for sample in samples:
                 await self.file_handler.add_sample(list(sample))
             print(f"Received {num_of_samples} samples")
