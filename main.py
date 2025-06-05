@@ -1,11 +1,37 @@
 import asyncio
 from BLEHandler import BLEHandler
-from helpers import find_device, input_handler
+from helpers import find_device
 from FileHandler import FileHandler
 
 DEVICE_NAME =           "Nano33BLE"
 DATA_FILENAME =         "Data.csv"
 FILE_BUFFER_SIZE =      10
+
+async def input_handler(handler1: BLEHandler, handler2: BLEHandler):
+    """
+    Handles User input to control starting and stopping readings from connected device.
+    Args:
+        BLE_Handler: :class:`BLEHandler` class to call functions from within it based on user input.
+    Returns:
+        None
+    """
+    loop = asyncio.get_running_loop()
+    while True:
+        command = await loop.run_in_executor(None, input, "Enter 'start', 'stop', or 'exit': ")
+        command = command.strip().lower()
+        if command == "start":
+            await handler1.start_reading()
+            await handler2.start_reading()
+        elif command == "stop":
+            await handler1.stop_reading()
+            await handler2.stop_reading()
+        elif command == "exit":
+            await handler1.stop_reading()
+            await handler2.stop_reading()
+            await handler1.disconnect()
+            await handler2.disconnect()
+            print("Exiting Program...")
+            break
 
 async def main():
     file_handler1 = FileHandler(DATA_FILENAME, FILE_BUFFER_SIZE)
@@ -24,9 +50,8 @@ async def main():
 
 
     asyncio.create_task(ble_handler1.monitor_connection())
-    asyncio.create_task(input_handler(BLE_Handler=ble_handler1))
     asyncio.create_task(ble_handler2.monitor_connection())
-    asyncio.create_task(input_handler(BLE_Handler=ble_handler2))
+    await input_handler(ble_handler1, ble_handler2)
     
 if __name__ == "__main__":
     asyncio.run(main())
