@@ -3,6 +3,7 @@ import struct
 from bleak import BleakClient
 import time
 
+
 SERVICE_UUID =          "12345678-1234-1234-1234-123456789ABC"
 DATA_CHAR_UUID =        "12345678-1234-1234-1234-123456789AB1"
 BUFFER_SIZE =           10
@@ -103,7 +104,7 @@ class BLEHandler:
         print(f"Stopping Reading incoming data...")
         if self.running.is_set():
             self.running.clear()
-            self.cam_handler.stop_recording()
+            await self.cam_handler.stop_recording()
             try:
                 await self.client.stop_notify(DATA_CHAR_UUID)
                 self.time_last_notif = None

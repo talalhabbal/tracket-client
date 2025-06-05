@@ -11,7 +11,7 @@ class CamHandler:
         self.warmup = 5
         self.running = asyncio.Event()
         self.out = None
-        self.cap = self.initialize_camera()
+        self.cap = None
         
 
     def initialize_camera(self):
@@ -75,4 +75,6 @@ class CamHandler:
         if self.running.is_set():
             print("Recorder Stop requested")
             self.running.clear()
-        
+            
+    async def warm_up(self):
+        self.cap = await asyncio.to_thread(self.initialize_camera)

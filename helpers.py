@@ -2,7 +2,7 @@ import asyncio
 from bleak import BleakScanner
 
 
-async def input_handler(BLE_Handler):
+async def input_handler(BLE_Handler, cam_handler):
     """
     Handles User input to control starting and stopping readings from connected device.
     Args:
@@ -15,6 +15,7 @@ async def input_handler(BLE_Handler):
         command = await loop.run_in_executor(None, input, "Enter 'start', 'stop', or 'exit': ")
         command = command.strip().lower()
         if command == "start":
+            # asyncio.create_task(BLE)
             await BLE_Handler.start_reading()
         elif command == "stop":
             await BLE_Handler.stop_reading()

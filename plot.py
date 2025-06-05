@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Change this to the path of your CSV file
-csv_file = 'Data.csv'
+csv_file = 'cam_output/2/Data.csv'
 
 # Read the CSV file into a pandas DataFrame
 data = pd.read_csv(csv_file)
